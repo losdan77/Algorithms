@@ -27,3 +27,5 @@
 - `generating_random_numbers.py` - генерирование случайных чисел
 - `greatest_common_divisor.py` - наибольший общий делитель
 - `primality_check.py` - проверка на простоту
+- `find_prime_factors.py` - поиск простых множителей (факторизация)
+- `numerical_methods.py` - численные методы (площадь сложной фигуры)
