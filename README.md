@@ -29,3 +29,5 @@
 - `primality_check.py` - проверка на простоту
 - `find_prime_factors.py` - поиск простых множителей (факторизация)
 - `numerical_methods.py` - численные методы (площадь сложной фигуры)
+#### 6. `/hashing` - хэширование
+- `direct_binding.py` - прямое связывание
