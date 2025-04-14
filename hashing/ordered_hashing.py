@@ -2,12 +2,6 @@ class DataItem:
     def __init__(self, key, value):
         self.key = key
         self.value = value
-        self.deleted = False
-
-    def delete(self):
-        self.key = None
-        self.value = None
-        self.deleted = True
 
     def __str__(self):
         return f"[{self.key:03d}:{self.value}]"
@@ -30,7 +24,6 @@ class HashTable:
         Добавляем элемент в хэш-таблицу.
         Возбуждаем исключение, если элемент уже есть в таблице.
         """
-        step = 0 # для квадратичного пробирования
         key = int(value[1:4])
 
         # Проверяем заполненность хэш-таблицы.
@@ -42,37 +35,40 @@ class HashTable:
 
         while True:
             # Проверяем, не пуст ли текущий элемент.
-            if not self.table[start_index] or self.table[start_index].deleted:
+            if not self.table[start_index]:
                 # Вставляем элемент в хэш-таблицу.
                 self.table[start_index] = DataItem(key, value)
                 self.elements += 1
                 return
             
-            # Проверяем, не прошли ли мы уже по кругу. (квадратичное пробирование)
-            if step == self.size:
-                return
-            
             # Проверяем, нет ли элемента с переданным ключом в таблице.
             if self.table[start_index].key == key:
                 raise ValueError(f"Ключ {key} уже находится в таблице под индексом {start_index}.)")
+            
+            # Смотрим, если существующий элемент больше нового.
+            if self.table[start_index].key > key:
+                # Меняем значения и делаем рехэширование.
+                old_item = self.table[start_index]
+                
+                # Вставляем на текущее место новое значение.
+                self.table[start_index] = DataItem(key, value)
 
-            # Переходим к следующей ячейке. (линейное пробирование)
-            # start_index = self._hash(start_index + HashTable.STEP)
+                # Запоминаем ключ и значение
+                key = old_item.key
+                value = old_item.value
 
-            # Переходим к следующей ячейке. (квадратичное пробирование)
-            step += 1
-            start_index = self._hash(start_index + step**2)
+            # Переходим к следующей ячейке.
+            start_index = self._hash(start_index + HashTable.STEP)
 
     def find(self, key):
-        start_index = self._hash(key)
         num_probe = 0
-        step = 0 # для квадратичного пробирования
+        start_index = self._hash(key)
         
         while True:
             num_probe += 1
 
             # Проверяем, не пуст ли очередной элемент.
-            if not self.table[start_index]:
+            if not self.table[start_index] or self.table[start_index].key > key:
                 return 
 
             # Проверяем, не находится ли в ячейке целевой элемент.
@@ -83,18 +79,9 @@ class HashTable:
             if num_probe > self.size:
                 return 
 
-            # Переходим к следующей ячейке. (линейное пробирование)
-            # start_index = self._hash(start_index + HashTable.STEP)
+            # Переходим к следующей ячейке.
+            start_index = self._hash(start_index + HashTable.STEP)
 
-            # Переходим к следующей ячейке. (квадратичное пробирование)
-            step += 1
-            start_index = self._hash(start_index + step**2)
-
-    def delete(self, key):
-        element = self.find(key)
-        if element:
-            self.elements -= 1
-            element.delete()
 
     def __str__(self):
         """
@@ -104,8 +91,6 @@ class HashTable:
         for i in range(self.size):
             if self.table[i] is None:
                 text += f"{i: 3d}: [--------]\n"
-            elif self.table[i] and self.table[i].deleted:
-                text += f"{i: 3d}: deleted\n"
             else:
                 text += f"{i: 3d}: {self.table[i]}\n"
 
@@ -121,15 +106,10 @@ def main():
         "T162BA39RUS", "C130BE39RUS", "B498BE39RUS", "B513MK39RUS",
     ]
 
-    ht = HashTable(23)
+    ht = HashTable(20)
     for value in example_array:
         ht.add(value)
     print(ht)
-
-    # print(ht.find(157))
-
-    # ht.delete(157)
-    # print(ht)
 
     # print(ht.find(157))
 

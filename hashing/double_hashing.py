@@ -2,19 +2,13 @@ class DataItem:
     def __init__(self, key, value):
         self.key = key
         self.value = value
-        self.deleted = False
-
-    def delete(self):
-        self.key = None
-        self.value = None
-        self.deleted = True
 
     def __str__(self):
         return f"[{self.key:03d}:{self.value}]"
     
 
 class HashTable:
-    STEP = 1
+    PRIME = 7
 
     def __init__(self, size):
         self.size = size
@@ -25,12 +19,15 @@ class HashTable:
     def _hash(self, key):
         return key % self.size
     
+    def _hash2(self, key):
+        return HashTable.PRIME - key % self.size
+    
     def add(self, value):
         """
         Добавляем элемент в хэш-таблицу.
         Возбуждаем исключение, если элемент уже есть в таблице.
         """
-        step = 0 # для квадратичного пробирования
+        step = 1
         key = int(value[1:4])
 
         # Проверяем заполненность хэш-таблицы.
@@ -38,17 +35,17 @@ class HashTable:
             raise OverflowError
         
         # Высчитываем начальный индекс для вставки.
-        start_index = self._hash(key)
+        start_index = (self._hash(key) + step * self._hash2(key)) % self.size
 
         while True:
             # Проверяем, не пуст ли текущий элемент.
-            if not self.table[start_index] or self.table[start_index].deleted:
+            if not self.table[start_index]:
                 # Вставляем элемент в хэш-таблицу.
                 self.table[start_index] = DataItem(key, value)
                 self.elements += 1
                 return
             
-            # Проверяем, не прошли ли мы уже по кругу. (квадратичное пробирование)
+            # Проверяем, не прошли ли мы уже по кругу.
             if step == self.size:
                 return
             
@@ -56,17 +53,14 @@ class HashTable:
             if self.table[start_index].key == key:
                 raise ValueError(f"Ключ {key} уже находится в таблице под индексом {start_index}.)")
 
-            # Переходим к следующей ячейке. (линейное пробирование)
-            # start_index = self._hash(start_index + HashTable.STEP)
-
-            # Переходим к следующей ячейке. (квадратичное пробирование)
+            # Переходим к следующей ячейке.
             step += 1
-            start_index = self._hash(start_index + step**2)
+            start_index = (self._hash(key) + step * self._hash2(key)) % self.size
 
     def find(self, key):
-        start_index = self._hash(key)
         num_probe = 0
-        step = 0 # для квадратичного пробирования
+        step = 1 
+        start_index = (self._hash(key) + step * self._hash2(key)) % self.size
         
         while True:
             num_probe += 1
@@ -83,18 +77,10 @@ class HashTable:
             if num_probe > self.size:
                 return 
 
-            # Переходим к следующей ячейке. (линейное пробирование)
-            # start_index = self._hash(start_index + HashTable.STEP)
-
-            # Переходим к следующей ячейке. (квадратичное пробирование)
+            # Переходим к следующей ячейке.
             step += 1
-            start_index = self._hash(start_index + step**2)
+            start_index = (self._hash(key) + step * self._hash2(key)) % self.size
 
-    def delete(self, key):
-        element = self.find(key)
-        if element:
-            self.elements -= 1
-            element.delete()
 
     def __str__(self):
         """
@@ -104,8 +90,6 @@ class HashTable:
         for i in range(self.size):
             if self.table[i] is None:
                 text += f"{i: 3d}: [--------]\n"
-            elif self.table[i] and self.table[i].deleted:
-                text += f"{i: 3d}: deleted\n"
             else:
                 text += f"{i: 3d}: {self.table[i]}\n"
 
@@ -121,15 +105,10 @@ def main():
         "T162BA39RUS", "C130BE39RUS", "B498BE39RUS", "B513MK39RUS",
     ]
 
-    ht = HashTable(23)
+    ht = HashTable(20)
     for value in example_array:
         ht.add(value)
     print(ht)
-
-    # print(ht.find(157))
-
-    # ht.delete(157)
-    # print(ht)
 
     # print(ht.find(157))
 

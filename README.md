@@ -31,4 +31,6 @@
 - `numerical_methods.py` - численные методы (площадь сложной фигуры)
 #### 6. `/hashing` - хэширование
 - `direct_binding.py` - прямое связывание
-- `open_addressing.py` - открытая адресация
+- `open_addressing.py` - открытая адресация (линейная и квадротичная пробирование)
+- `double_hashing.py` - двойное хэширование
+- `ordered_hashing.py` - упорядоченное хэширование
